@@ -1,1 +1,4 @@
 project_id = "vdlyqbzrzlftynrtzgvp"
+
+[functions.generate-annual-report]
+verify_jwt = false
