@@ -2,8 +2,10 @@ import { useState } from "react";
 import StarfieldBg from "@/components/annual/StarfieldBg";
 import AnnualInput from "@/components/annual/AnnualInput";
 import AnnualResult from "@/components/annual/AnnualResult";
-import { type AnnualReportData, generateMockReport } from "@/lib/annual-calc";
+import { type AnnualReportData } from "@/lib/annual-calc";
 import { Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const AnnualPage = () => {
   const [report, setReport] = useState<AnnualReportData | null>(null);
@@ -11,11 +13,29 @@ const AnnualPage = () => {
 
   const handleGenerate = async (birthYear: number, birthMonth: number, birthDay: number, targetYear: number) => {
     setIsLoading(true);
-    // Simulate loading for effect
-    await new Promise((r) => setTimeout(r, 1500));
-    const data = generateMockReport(birthYear, birthMonth, birthDay, targetYear);
-    setReport(data);
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-annual-report", {
+        body: { birthYear, birthMonth, birthDay, targetYear },
+      });
+
+      if (error) {
+        console.error("Edge function error:", error);
+        toast.error("報告生成失敗，請稍後再試。");
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setReport(data as AnnualReportData);
+    } catch (e) {
+      console.error("Generate report error:", e);
+      toast.error("網路錯誤，請稍後再試。");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleReset = () => setReport(null);
