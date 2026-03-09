@@ -14,7 +14,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/annual-fortune-weaver">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/annual" element={<AnnualPage />} />
